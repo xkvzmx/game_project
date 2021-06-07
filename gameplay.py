@@ -36,9 +36,9 @@ def loadImage(name, useColorKey=False):
 class MyPlayer(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.image = loadImage("baller2.jpg",True)
+        self.image = loadImage("baller02.png",True)
         self.rect = self.image.get_rect()
-        self.rect.center = (0.20*SCREEN_WIDTH, 0.5*SCREEN_HEIGHT)
+        self.rect.center = (0.15*SCREEN_WIDTH, 0.71*SCREEN_HEIGHT)
         self.x_velocity = 0
         self.y_velocity = 0
 
