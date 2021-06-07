@@ -38,12 +38,22 @@ class MyPlayer(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.image = loadImage("baller02.png",True)
         self.rect = self.image.get_rect()
-        self.rect.center = (0.15*SCREEN_WIDTH, 0.71*SCREEN_HEIGHT)
+        self.rect.center = (0.15*SCREEN_WIDTH, 0.75*SCREEN_HEIGHT)
         self.x_velocity = 0
         self.y_velocity = 0
 
     def update(self):
-        pass
+        self.rect.move_ip((self.x_velocity, self.y_velocity))
+
+        if self.rect.left < 70:
+            self.rect.left = 70
+        elif self.rect.right > 1120:
+            self.rect.right = 1120
+
+        if self.rect.top <= SCREEN_HEIGHT/2: #tylko dolna połowa ekranu
+            self.rect.top = SCREEN_HEIGHT/2
+        elif self.rect.bottom >= SCREEN_HEIGHT:
+            self.rect.bottom = SCREEN_HEIGHT
 
 
 #-----------------------------------------------------------------------------
@@ -56,8 +66,8 @@ screen = pygame.display.set_mode((SCREEN_SIZE))
 pygame.display.set_caption("Basket League")
 
 # load backgroud file
-background_image = loadImage("court13.jpg")
-screen.blit(background_image,(-115,-100))
+background_image = loadImage("court130.jpg")
+screen.blit(background_image,(0,0))
 
 # initialize player
 myplayerSprite = pygame.sprite.RenderClear()    #container box
@@ -71,8 +81,30 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+        elif event.type == KEYDOWN:
+            if event.key == K_ESCAPE:
+                running = False
+            elif event.key == K_LEFT:
+                myplayer.x_velocity = -1
+            elif event.key == K_RIGHT:
+                myplayer.x_velocity = 1
+            elif event.key == K_UP:
+                pass
+            elif event.key == K_DOWN:
+                pass
+        elif event.type == KEYUP:
+            if event.key == K_LEFT:
+                myplayer.x_velocity = 0 
+            elif event.key == K_RIGHT:
+                myplayer.x_velocity = 0
+            elif event.key == K_UP:
+                myplayer.y_velocity = 0
+            elif event.key == K_DOWN:
+                myplayer.y_velocity = 0
         
-    myplayerSprite.draw(screen)
+    myplayerSprite.update()     #update player sprite
+    myplayerSprite.clear(screen,background_image) #clean screen
+    myplayerSprite.draw(screen) #draw player sprite
 
     pygame.display.flip() #update the display
     
