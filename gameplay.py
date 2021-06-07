@@ -41,6 +41,7 @@ class MyPlayer(pygame.sprite.Sprite):
         self.rect.center = (0.15*SCREEN_WIDTH, 0.75*SCREEN_HEIGHT)
         self.x_velocity = 0
         self.y_velocity = 0
+        self.jumped = False
 
     def update(self):
         self.rect.move_ip((self.x_velocity, self.y_velocity))
@@ -50,10 +51,11 @@ class MyPlayer(pygame.sprite.Sprite):
         elif self.rect.right > 1120:
             self.rect.right = 1120
 
-        if self.rect.top <= SCREEN_HEIGHT/2: #tylko dolna połowa ekranu
-            self.rect.top = SCREEN_HEIGHT/2
-        elif self.rect.bottom >= SCREEN_HEIGHT:
-            self.rect.bottom = SCREEN_HEIGHT
+        if self.rect.top <= 250:
+            self.rect.top = 250
+            self.y_velocity = 5
+        elif self.rect.bottom >= 450:
+            self.rect.bottom = 450
 
 
 #-----------------------------------------------------------------------------
@@ -74,10 +76,12 @@ myplayerSprite = pygame.sprite.RenderClear()    #container box
 myplayer = MyPlayer()                           #create player
 myplayerSprite.add(myplayer)                    #add player
 
-
-
+# initialize time and running status
+clock = pygame.time.Clock()
 running = True
+
 while running:
+    clock.tick(40)  # up to 40 frames per second
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -85,11 +89,12 @@ while running:
             if event.key == K_ESCAPE:
                 running = False
             elif event.key == K_LEFT:
-                myplayer.x_velocity = -1
+                myplayer.x_velocity = -4
             elif event.key == K_RIGHT:
-                myplayer.x_velocity = 1
-            elif event.key == K_UP:
-                pass
+                myplayer.x_velocity = 4
+            elif event.key == K_UP and myplayer.jumped == False and myplayer.rect.bottom == 450:
+                myplayer.y_velocity = -12
+                myplayer.jumped = True
             elif event.key == K_DOWN:
                 pass
         elif event.type == KEYUP:
@@ -98,9 +103,10 @@ while running:
             elif event.key == K_RIGHT:
                 myplayer.x_velocity = 0
             elif event.key == K_UP:
-                myplayer.y_velocity = 0
+                myplayer.y_velocity = 5
+                myplayer.jumped = False
             elif event.key == K_DOWN:
-                myplayer.y_velocity = 0
+                pass
         
     myplayerSprite.update()     #update player sprite
     myplayerSprite.clear(screen,background_image) #clean screen
