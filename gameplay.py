@@ -10,6 +10,7 @@ import math
 SCREEN_WIDTH = 1200
 SCREEN_HEIGHT = 500
 SCREEN_SIZE = (SCREEN_WIDTH, SCREEN_HEIGHT)
+WHITE = (255,255,255)
 
 #-----------------------------------------------------------------------
 # Auxiliary functions
@@ -82,6 +83,7 @@ class Ball(pygame.sprite.Sprite):
         self.y_velocity = 0
         self.dy = 0
         self.music = False
+        self.attempt = False
     def update(self):
         if self.isdribble == False:
             self.kill()
@@ -92,8 +94,13 @@ class Ball(pygame.sprite.Sprite):
                 self.dy = 20
             self.y_velocity += self.dy
             self.rect.move_ip((self.x_velocity,self.y_velocity))
-            if 968 < self.rect.left < 988 and 993 < self.rect.right < 1013 and 223 < self.rect.top < 243 and 248 < self.rect.bottom < 268 and 0.1 < math.tan(self.x_velocity/self.y_velocity) < 1.0:
-                print("POINT !")
+            if self.attempt == False and 963 < self.rect.left < 993 and 988 < self.rect.right < 1018 and 218 < self.rect.top < 248 and 243 < self.rect.bottom < 273 and 0.1 < math.tan(self.x_velocity/self.y_velocity) < 1.0:
+                bravoFX.play()
+                self.attempt = True
+                scoreboardSprite.update()
+                scoreboardSprite.clear(screen, background_image)
+                scoreboardSprite.draw(screen)
+                pygame.display.flip()
 
         else:
             self.rect.move_ip((self.x_velocity,self.y_velocity))
@@ -112,6 +119,23 @@ class Ball(pygame.sprite.Sprite):
                 self.rect.bottom = 450
                 self.y_velocity = -5
 
+#-----------------------------------
+# ScoreBoard class
+#-----------------------------------
+class ScoreBoard(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.score = 0
+        self.text = "Points: %4d" % self.score
+        self.font = pygame.font.SysFont(None,50)
+        self.image = self.font.render(self.text,1,WHITE)
+        self.rect = self.image.get_rect()
+
+    def update(self):
+        self.score += 1
+        self.text = "Points: %4d" % self.score
+        self.image = self.font.render(self.text,1,WHITE)
+        self.rect = self.image.get_rect()
 
 
 #-----------------------------------------------------------------------------
@@ -128,8 +152,10 @@ background_image = loadImage("court130.jpg")
 screen.blit(background_image,(0,0))
 
 # load audio files
-myballSoundFX = loadSound("493747__dj997__basketball-bouncing.wav")
-shootFX = loadSound("32934__sanus-excipio__hoo-hoo-hoo.wav")
+myballSoundFX = loadSound("bouncing.wav")
+shootFX = loadSound("shoot.wav")
+bravoFX = loadSound("applause.wav")
+
 # initialize player
 myplayerSprite = pygame.sprite.RenderClear()    #player container
 myplayer = MyPlayer()                           #create player
@@ -139,6 +165,12 @@ myplayerSprite.add(myplayer)                    #add player
 myballSprite = pygame.sprite.RenderClear()      #ball container
 myball = Ball(myplayer)                         #create ball
 myballSprite.add(myball)                        #add ball
+
+# initialize score board
+scoreboardSprite = pygame.sprite.RenderClear()
+scoreboardSprite.add(ScoreBoard())
+scoreboardSprite.draw(screen)
+pygame.display.flip()
 
 # initialize time and running status
 clock = pygame.time.Clock()
@@ -152,46 +184,63 @@ while running:
         elif event.type == KEYDOWN:
             if event.key == K_ESCAPE:
                 running = False
-            elif event.key == K_LEFT and myball.shoot == False:
+            elif event.key == K_LEFT:
                 myplayer.x_velocity = -4
-                myball.x_velocity = -4
-            elif event.key == K_RIGHT and myball.shoot == False:
+                if myball.shoot == False:
+                    myball.x_velocity = -4
+            elif event.key == K_RIGHT:
                 myplayer.x_velocity = 4
-                myball.x_velocity = 4
+                if myball.shoot == False:
+                    myball.x_velocity = 4
             elif event.key == K_UP and myplayer.jumped == False and myplayer.rect.bottom == 450 and myball.isdribble == False:
                 myplayer.y_velocity = -12
                 #myball.y_velocity = -12
                 myplayer.jumped = True
-            elif event.key == K_DOWN and myplayer.rect.bottom==450:
+            elif event.key == K_DOWN and myplayer.rect.bottom==450 and myball.shoot==True and (myball.rect.right > 1100 or myplayer.rect.right > 1000):
                 myplayer.x_velocity = 0
                 myplayer.y_velocity = 0
                 myball.isdribble = False
                 #myballSprite = pygame.sprite.RenderClear()      #ball container
                 myball = Ball(myplayer)                         #create ball
                 myballSprite.add(myball)                        #add ball
-            elif event.key == K_r:
-                myball.isdribble = False
-            elif event.key == K_SPACE and myplayer.jumped == False and myplayer.rect.bottom == 450 and myball.isdribble==True:
-                myballSoundFX.stop()
-                shootFX.play()
-                myball.kill()
-                myball = Ball(myplayer)                         #create ball
-                myballSprite.add(myball) 
-                myball.rect.center = (myplayer.rect.midtop)
-                myball.shoot = True
-                myplayer.y_velocity = -12
-                myplayer.jumped = True
-                myball.x_velocity = random.randrange(15,17)
-                myball.y_velocity = random.randrange(-18,-14)
+            elif event.key == K_SPACE and myplayer.jumped == False and myplayer.rect.bottom == 450 and myball.isdribble==True and myball.shoot==False:
+                if myball.shoot == False or myball.shoot == True and myball.rect.right > 1200:
+                    myballSoundFX.stop()
+                    shootFX.play()
+                    myball.kill()
+                    myball = Ball(myplayer)                         #create ball
+                    myballSprite.add(myball) 
+                    myball.rect.center = (myplayer.rect.midtop)
+                    myball.shoot = True
+                    myplayer.y_velocity = -12
+                    myplayer.jumped = True
+                    myball.attempt = False
+                    if myplayer.rect.right < 650: #half court 10%
+                        myball.x_velocity = random.randrange(17,27)
+                        myball.y_velocity = random.randrange(-19,-14)
+                    elif 650 <= myplayer.rect.right < 840: #three points 50%
+                        myball.x_velocity = random.randrange(10,16)
+                        myball.y_velocity = random.randrange(-15,-12)
+                    elif 840 <= myplayer.rect.right < 975: #2 points 75%
+                        myball.x_velocity = random.randrange(6,8)
+                        myball.y_velocity = random.randrange(-12,-10)
+                    elif 975 <= myplayer.rect.right < 1040: #2 point close 90%
+                        myball.x_velocity = random.randrange(1,3)
+                        myball.y_velocity = random.randrange(-11,-10)
+                    else: #layup 100%
+                        myball.x_velocity = random.randrange(1,2)
+                        myball.y_velocity = random.randrange(-10,-9)
 
 
         elif event.type == KEYUP:
             if event.key == K_LEFT:
                 myplayer.x_velocity = 0 
-                myball.x_velocity = 0 
+                if myball.shoot == False:
+                    myball.x_velocity = 0
             elif event.key == K_RIGHT:
                 myplayer.x_velocity = 0
-                myball.x_velocity = 0
+                if myball.shoot == False:
+                    myball.x_velocity = 0
             elif event.key == K_UP:
                 myplayer.y_velocity = 5
                 #myball.y_velocity = 5
@@ -201,6 +250,7 @@ while running:
             elif event.key == K_SPACE:
                 myplayer.y_velocity = 5
                 myplayer.jumped = False
+                #myball.shoot = True
         
     myplayerSprite.update()     #update player sprite
     myballSprite.update()       #update ball sprite
