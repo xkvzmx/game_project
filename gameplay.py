@@ -2,6 +2,7 @@ import pygame
 from pygame.locals import *
 import os.path
 import random
+import math
 
 #-----------------------------------------------------------------------
 # Program parameters
@@ -75,12 +76,21 @@ class Ball(pygame.sprite.Sprite):
         self.shoot = False
         self.x_velocity = 0
         self.y_velocity = 0
+        self.dy = 0
 
     def update(self):
         if self.isdribble == False:
             self.kill()
         elif self.shoot == True:
+            #add gravity
+            self.dy += 0.1
+            if self.dy >= 20:
+                self.dy = 20
+            self.y_velocity += self.dy
             self.rect.move_ip((self.x_velocity,self.y_velocity))
+            if 968 < self.rect.left < 988 and 993 < self.rect.right < 1013 and 223 < self.rect.top < 243 and 248 < self.rect.bottom < 268 and 0.1 < math.tan(self.x_velocity/self.y_velocity) < 1.0:
+                print("POINT !")
+                
         else:
             self.rect.move_ip((self.x_velocity,self.y_velocity))
 
@@ -95,6 +105,8 @@ class Ball(pygame.sprite.Sprite):
             elif self.rect.bottom >= 450:
                 self.rect.bottom = 450
                 self.y_velocity = -5
+
+
 
 #-----------------------------------------------------------------------------
 # Proper program
@@ -148,7 +160,7 @@ while running:
                 #myballSprite = pygame.sprite.RenderClear()      #ball container
                 myball = Ball(myplayer)                         #create ball
                 myballSprite.add(myball)                        #add ball
-            elif event.key == K_i:
+            elif event.key == K_r:
                 myball.isdribble = False
             elif event.key == K_SPACE and myplayer.jumped == False and myplayer.rect.bottom == 450 and myball.isdribble==True:
                 myball.kill()
@@ -158,8 +170,8 @@ while running:
                 myball.shoot = True
                 myplayer.y_velocity = -12
                 myplayer.jumped = True
-                myball.x_velocity = random.randint(10,20)
-                myball.y_velocity = -25
+                myball.x_velocity = random.randrange(15,17)
+                myball.y_velocity = random.randrange(-18,-14)
 
 
         elif event.type == KEYUP:
