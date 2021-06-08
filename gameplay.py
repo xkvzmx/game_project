@@ -31,7 +31,11 @@ def loadImage(name, useColorKey=False):
         image.set_colorkey(colorkey,RLEACCEL) #set as transparent, increase performance with the RLEACCEL flag
     return image
 
-
+def loadSound(name):
+    """Upload a sound file and convert with pygame mixer."""
+    fullname = os.path.join("sounds",name)
+    sound = pygame.mixer.Sound(fullname)
+    return sound
 #-----------------------------------------------------------------------------
 # Object classes
 #-----------------------------------------------------------------------------
@@ -77,7 +81,7 @@ class Ball(pygame.sprite.Sprite):
         self.x_velocity = 0
         self.y_velocity = 0
         self.dy = 0
-
+        self.music = False
     def update(self):
         if self.isdribble == False:
             self.kill()
@@ -90,10 +94,12 @@ class Ball(pygame.sprite.Sprite):
             self.rect.move_ip((self.x_velocity,self.y_velocity))
             if 968 < self.rect.left < 988 and 993 < self.rect.right < 1013 and 223 < self.rect.top < 243 and 248 < self.rect.bottom < 268 and 0.1 < math.tan(self.x_velocity/self.y_velocity) < 1.0:
                 print("POINT !")
-                
+
         else:
             self.rect.move_ip((self.x_velocity,self.y_velocity))
-
+            if self.music == False:
+                myballSoundFX.play()
+                self.music = True
             if self.rect.left < 133:
                 self.rect.left = 133
             elif self.rect.right > 1060:
@@ -121,6 +127,9 @@ pygame.display.set_caption("Basket League")
 background_image = loadImage("court130.jpg")
 screen.blit(background_image,(0,0))
 
+# load audio files
+myballSoundFX = loadSound("493747__dj997__basketball-bouncing.wav")
+shootFX = loadSound("32934__sanus-excipio__hoo-hoo-hoo.wav")
 # initialize player
 myplayerSprite = pygame.sprite.RenderClear()    #player container
 myplayer = MyPlayer()                           #create player
@@ -163,6 +172,8 @@ while running:
             elif event.key == K_r:
                 myball.isdribble = False
             elif event.key == K_SPACE and myplayer.jumped == False and myplayer.rect.bottom == 450 and myball.isdribble==True:
+                myballSoundFX.stop()
+                shootFX.play()
                 myball.kill()
                 myball = Ball(myplayer)                         #create ball
                 myballSprite.add(myball) 
