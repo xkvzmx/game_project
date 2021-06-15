@@ -19,6 +19,11 @@
 **pygame** - The main game engine. Gameplay with the use of Sprites.
 
 ### Screenshots
+![](https://github.com/xkvzmx/game_project/blob/main/shots/01.png)
+![](https://github.com/xkvzmx/game_project/blob/main/shots/02.png)
+![](https://github.com/xkvzmx/game_project/blob/main/shots/03.png)
+![](https://github.com/xkvzmx/game_project/blob/main/shots/04.png)
+![](https://github.com/xkvzmx/game_project/blob/main/shots/05.png)
 
 ### How to run this app?
 1. Clone the project:

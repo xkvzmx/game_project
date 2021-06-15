@@ -55,6 +55,7 @@ class MyPlayer(pygame.sprite.Sprite):
         self.jumped = False
 
     def update(self):
+        """Move player and check his position."""
         self.rect.move_ip((self.x_velocity, self.y_velocity))
 
         if self.rect.left < 70:
@@ -85,6 +86,8 @@ class Ball(pygame.sprite.Sprite):
         self.music = False
         self.attempt = False
     def update(self):
+        """Is responsible for the movement of the ball and checking several conditions,
+        including for scoring a point."""
         if self.isdribble == False:
             self.kill()
         elif self.shoot == True:
@@ -132,6 +135,7 @@ class ScoreBoard(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
 
     def update(self):
+        """Add 1 point and update the Board."""
         self.score += 1
         self.text = "Points: %4d" % self.score
         self.image = self.font.render(self.text,1,WHITE)
@@ -192,15 +196,11 @@ while running:
                 myplayer.x_velocity = 4
                 if myball.shoot == False:
                     myball.x_velocity = 4
-            elif event.key == K_UP and myplayer.jumped == False and myplayer.rect.bottom == 450 and myball.isdribble == False:
-                myplayer.y_velocity = -12
-                #myball.y_velocity = -12
-                myplayer.jumped = True
             elif event.key == K_DOWN and myplayer.rect.bottom==450 and myball.shoot==True and (myball.rect.right > 1100 or myplayer.rect.right > 1000):
                 myplayer.x_velocity = 0
                 myplayer.y_velocity = 0
                 myball.isdribble = False
-                #myballSprite = pygame.sprite.RenderClear()      #ball container
+                #myballSprite = pygame.sprite.RenderClear()     #ball container
                 myball = Ball(myplayer)                         #create ball
                 myballSprite.add(myball)                        #add ball
             elif event.key == K_SPACE and myplayer.jumped == False and myplayer.rect.bottom == 450 and myball.isdribble==True and myball.shoot==False:
@@ -215,19 +215,19 @@ while running:
                     myplayer.y_velocity = -12
                     myplayer.jumped = True
                     myball.attempt = False
-                    if myplayer.rect.right < 650: #half court 10%
+                    if myplayer.rect.right < 650:               #half court shots
                         myball.x_velocity = random.randrange(17,27)
                         myball.y_velocity = random.randrange(-19,-14)
-                    elif 650 <= myplayer.rect.right < 840: #three points 50%
+                    elif 650 <= myplayer.rect.right < 840:      #three points shots
                         myball.x_velocity = random.randrange(10,16)
                         myball.y_velocity = random.randrange(-15,-12)
-                    elif 840 <= myplayer.rect.right < 975: #2 points 75%
+                    elif 840 <= myplayer.rect.right < 975:      #2 points shots
                         myball.x_velocity = random.randrange(6,8)
                         myball.y_velocity = random.randrange(-12,-10)
-                    elif 975 <= myplayer.rect.right < 1040: #2 point close 90%
+                    elif 975 <= myplayer.rect.right < 1040:     #2 point close-range shots
                         myball.x_velocity = random.randrange(1,3)
                         myball.y_velocity = random.randrange(-11,-10)
-                    else: #layup 100%
+                    else:                                       #layups
                         myball.x_velocity = random.randrange(1,2)
                         myball.y_velocity = random.randrange(-10,-9)
 
@@ -241,16 +241,9 @@ while running:
                 myplayer.x_velocity = 0
                 if myball.shoot == False:
                     myball.x_velocity = 0
-            elif event.key == K_UP:
-                myplayer.y_velocity = 5
-                #myball.y_velocity = 5
-                myplayer.jumped = False
-            elif event.key == K_DOWN:
-                pass
             elif event.key == K_SPACE:
                 myplayer.y_velocity = 5
                 myplayer.jumped = False
-                #myball.shoot = True
         
     myplayerSprite.update()     #update player sprite
     myballSprite.update()       #update ball sprite
@@ -262,4 +255,3 @@ while running:
     myballSprite.draw(screen)   #draw ball sprite
 
     pygame.display.flip() #update the display
-    
